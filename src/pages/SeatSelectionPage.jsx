@@ -12,7 +12,8 @@ import {
   ArrowRight, 
   RefreshCw,
   ShieldCheck,
-  ChevronDown
+  ChevronDown,
+  X
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { movieService } from '../api/movieApi';
@@ -95,6 +96,21 @@ const SeatSelectionPage = () => {
   const [selectedTime, setSelectedTime] = useState(initialTime);
   const [selectedFormat, setSelectedFormat] = useState(initialFormat);
 
+  // Movie Switcher & Screen selection modal
+  const [isMoviePickerOpen, setIsMoviePickerOpen] = useState(false);
+
+  // Switch Movie handler
+  const handleSelectMovie = (movie) => {
+    setSelectedMovie(movie);
+    if (movie.formats && movie.formats.length > 0) {
+      setSelectedFormat(movie.formats[0]);
+    }
+    // Reset selected seats when switching movie/screen
+    setSelectedSeats([]);
+    setIsMoviePickerOpen(false);
+    toast.info(`Switched to "${movie.title}" on ${movie.fixedScreen || `Screen ${movie.screenNumber || movie.id}`}`);
+  };
+
   // Seat Selection State
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [bookedSeats, setBookedSeats] = useState([]);
@@ -164,6 +180,9 @@ const SeatSelectionPage = () => {
       theatreId: selectedTheatre.id,
       theatreName: selectedTheatre.name,
       theatreAddress: selectedTheatre.address,
+      screenNumber: selectedMovie.screenNumber || 1,
+      screenName: selectedMovie.screenName || 'Screen 1 - IMAX 70MM Dual Laser',
+      fixedScreen: selectedMovie.fixedScreen || 'Screen 1 (IMAX 70MM)',
       date: selectedDate,
       showtime: selectedTime,
       format: selectedFormat,
@@ -217,7 +236,25 @@ const SeatSelectionPage = () => {
                 {selectedFormat}
               </span>
             </div>
-            <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
+
+            {/* Dedicated Fixed Screen Badge & Movie Selection Trigger */}
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
+                {selectedMovie.fixedScreen || `Screen ${selectedMovie.screenNumber || 1}`}
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsMoviePickerOpen(!isMoviePickerOpen)}
+                className="text-[11px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1.5 cursor-pointer bg-[#12130d] px-2.5 py-0.5 rounded-lg border border-amber-900/40 hover:border-amber-500/60 transition-colors"
+                title="Select movie & fixed screen"
+              >
+                <Film className="w-3 h-3 text-amber-400" />
+                <span>Select Movie (Fixed Screen)</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${isMoviePickerOpen ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-1">
               <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>{selectedTheatre.name} • {selectedTheatre.city}</span>
             </p>
@@ -263,20 +300,83 @@ const SeatSelectionPage = () => {
 
       </div>
 
+      {/* Movie Selection Drawer (Each movie has a dedicated fixed screen) */}
+      {isMoviePickerOpen && (
+        <div className="p-5 rounded-2xl bg-[#161710] border border-amber-500/50 shadow-2xl space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between pb-3 border-b border-amber-950/60">
+            <div>
+              <h3 className="text-sm font-black text-white flex items-center gap-2">
+                <Film className="w-4 h-4 text-amber-400" />
+                <span>Select Movie — Each Movie Plays in a Dedicated Fixed Screen</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Auditorium screens are permanently calibrated for each feature film's visual and audio format.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsMoviePickerOpen(false)}
+              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-80 overflow-y-auto pr-1">
+            {MOCK_MOVIES.map((movie) => {
+              const isSelected = movie.id === selectedMovie.id;
+              return (
+                <div
+                  key={movie.id}
+                  onClick={() => handleSelectMovie(movie)}
+                  className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                    isSelected
+                      ? 'bg-amber-500/15 border-amber-500 ring-1 ring-amber-500/40 shadow-lg shadow-amber-500/10'
+                      : 'bg-[#12130d] border-amber-900/30 hover:border-amber-700/60 hover:bg-[#1a1b12]'
+                  }`}
+                >
+                  <img
+                    src={movie.poster}
+                    alt={movie.title}
+                    className="w-11 h-16 rounded-lg object-cover ring-1 ring-amber-900/40 shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-xs font-bold text-white truncate">{movie.title}</h4>
+                    <div className="mt-1">
+                      <span className="inline-block text-[10px] font-black px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wide">
+                        {movie.fixedScreen || `Screen ${movie.screenNumber || movie.id}`}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1 truncate">
+                      {movie.genre?.slice(0, 2).join(', ')} • ★ {movie.rating}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Main Seat Selection Arena */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         
         {/* Left Column (2 Cols): Interactive Seat Layout Grid */}
         <div className="xl:col-span-2 p-6 rounded-2xl bg-[#161710] border border-amber-900/40 shadow-2xl flex flex-col items-center">
           
-          {/* Cinema Screen Curved Projection Banner Matching Reference Screen 2 */}
-          <div className="w-full max-w-md mx-auto mb-10 text-center">
+          {/* Cinema Screen Curved Projection Banner Showing Movie Fixed Screen */}
+          <div className="w-full max-w-lg mx-auto mb-10 text-center">
             <div className="relative flex flex-col items-center">
               {/* Arched glowing golden line */}
-              <div className="w-56 sm:w-72 h-8 border-t-[3px] border-amber-400/90 rounded-t-[120px] shadow-[0_-8px_25px_rgba(245,158,11,0.6)]" />
-              <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-300 -mt-2">
-                The Screen
-              </span>
+              <div className="w-64 sm:w-80 h-9 border-t-[3px] border-amber-400/90 rounded-t-[140px] shadow-[0_-8px_25px_rgba(245,158,11,0.6)]" />
+              <div className="-mt-3 flex items-center gap-2">
+                <span className="text-[11px] font-black uppercase tracking-widest text-amber-300">
+                  The Screen
+                </span>
+                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-wider">
+                  {selectedMovie.screenName || selectedMovie.fixedScreen || `Screen ${selectedMovie.screenNumber || 1}`}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -464,6 +564,36 @@ const SeatSelectionPage = () => {
                 Clear All
               </button>
             )}
+          </div>
+
+          {/* Active Movie & Dedicated Fixed Screen Card */}
+          <div className="p-3.5 rounded-xl bg-[#12130d] border border-amber-900/40 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <img
+                src={selectedMovie.poster}
+                alt={selectedMovie.title}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&q=80";
+                }}
+                className="w-10 h-14 rounded-lg object-cover ring-1 ring-amber-900/40 shrink-0"
+              />
+              <div className="truncate">
+                <p className="text-xs font-bold text-white truncate">{selectedMovie.title}</p>
+                <div className="mt-1">
+                  <span className="inline-block text-[10px] font-black px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 uppercase tracking-wide">
+                    {selectedMovie.fixedScreen || `Screen ${selectedMovie.screenNumber || 1}`}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsMoviePickerOpen(true)}
+              className="px-2 py-1 rounded bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-[10px] font-bold text-amber-300 hover:text-white transition-colors cursor-pointer shrink-0"
+            >
+              Switch Movie
+            </button>
           </div>
 
           {/* Selected Seat Tags */}

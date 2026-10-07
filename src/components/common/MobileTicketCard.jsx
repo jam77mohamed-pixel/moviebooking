@@ -116,6 +116,9 @@ const MobileTicketCard = ({ ticket, onDownload }) => {
               <p className="text-[11px] text-amber-300/90 truncate drop-shadow">
                 {ticket.theatreName || ticket.theatre || 'PVR Superplex IMAX'}
               </p>
+              <p className="text-[10px] text-amber-400 font-mono font-semibold truncate drop-shadow mt-0.5">
+                🎬 {ticket.screenName || ticket.fixedScreen || 'Screen 1 (IMAX 70MM)'}
+              </p>
             </div>
           </div>
 

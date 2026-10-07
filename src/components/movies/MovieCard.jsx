@@ -72,6 +72,12 @@ const MovieCard = ({ movie, viewMode = 'grid' }) => {
               </h3>
             </Link>
 
+            <div className="mt-1 mb-1.5">
+              <span className="inline-block text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                🎬 {movie.fixedScreen || `Screen ${movie.screenNumber || movie.id}`}
+              </span>
+            </div>
+
             <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 mt-1.5 mb-2.5">
               <span className="flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
@@ -218,6 +224,13 @@ const MovieCard = ({ movie, viewMode = 'grid' }) => {
               {movie.title}
             </h3>
           </Link>
+
+          {/* Dedicated Fixed Screen Badge */}
+          <div className="mb-2">
+            <span className="inline-block text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 truncate max-w-full">
+              🎬 {movie.fixedScreen || `Screen ${movie.screenNumber || movie.id}`}
+            </span>
+          </div>
 
           {/* Release Date */}
           <div className="flex items-center gap-1 text-[11px] text-slate-400 mb-2">

@@ -14,6 +14,7 @@ import {
   Flame
 } from 'lucide-react';
 import { movieService } from '../api/movieApi';
+import { getMovieFixedScreen } from '../api/mockData';
 import { useTheme } from '../context/ThemeContext';
 import Pagination from '../components/movies/Pagination';
 import EmptyState from '../components/common/EmptyState';
@@ -257,12 +258,12 @@ const TheatresPage = () => {
                           key={idx}
                           className="p-3.5 rounded-xl bg-[#12130d] border border-amber-900/40 flex flex-col justify-between"
                         >
-                          <div className="flex items-center justify-between mb-2.5">
-                            <span className="text-xs font-bold text-slate-200 truncate">
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="text-xs font-bold text-white truncate">
                               {show.movieTitle}
                             </span>
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                              {show.format}
+                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">
+                              🎬 {getMovieFixedScreen(show.movieId)?.fixedScreen || `Screen ${show.movieId || 1}`}
                             </span>
                           </div>
 

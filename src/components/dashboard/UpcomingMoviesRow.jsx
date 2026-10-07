@@ -80,6 +80,11 @@ const UpcomingMoviesRow = ({ movies = [] }) => {
                   <span>•</span>
                   <span>{movie.language}</span>
                 </div>
+                <div className="mt-1.5">
+                  <span className="inline-block text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 truncate max-w-full">
+                    🎬 {movie.fixedScreen || `Screen ${movie.screenNumber || movie.id}`}
+                  </span>
+                </div>
               </div>
 
               {/* Actions */}

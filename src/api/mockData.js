@@ -16,6 +16,9 @@ export const MOCK_MOVIES = [
     certification: "PG-13",
     director: "Denis Villeneuve",
     formats: ["IMAX 70MM", "Dolby Atmos", "4DX"],
+    screenNumber: 1,
+    screenName: "Screen 1 - IMAX 70MM Dual Laser",
+    fixedScreen: "Screen 1 (IMAX 70MM)",
     basePrice: 18.50,
     trailerId: "Way9Dexny3w",
     description: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe, he endeavors to prevent a terrible future only he can foresee.",
@@ -42,6 +45,9 @@ export const MOCK_MOVIES = [
     certification: "R",
     director: "Christopher Nolan",
     formats: ["IMAX 70MM", "Standard 70MM", "Dolby Cinema"],
+    screenNumber: 2,
+    screenName: "Screen 2 - Dolby Cinema & 64-Ch Atmos",
+    fixedScreen: "Screen 2 (Dolby Cinema)",
     basePrice: 19.00,
     trailerId: "uYPbbksJxIg",
     description: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II, exploring the moral paradoxes and political fallout that followed.",
@@ -67,6 +73,9 @@ export const MOCK_MOVIES = [
     certification: "PG",
     director: "Joaquim Dos Santos, Kemp Powers",
     formats: ["3D", "IMAX", "Dolby Atmos"],
+    screenNumber: 3,
+    screenName: "Screen 3 - Barco Laser 4K HDR",
+    fixedScreen: "Screen 3 (Laser 4K)",
     basePrice: 16.50,
     trailerId: "cqGjhVJWtEg",
     description: "Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its very existence. When the heroes clash on how to handle a new threat, Miles must redefine what it means to be a hero.",
@@ -91,6 +100,9 @@ export const MOCK_MOVIES = [
     certification: "R",
     director: "Shawn Levy",
     formats: ["IMAX 3D", "4DX", "Dolby Cinema"],
+    screenNumber: 4,
+    screenName: "Screen 4 - 4DX Dynamic Environmental",
+    fixedScreen: "Screen 4 (4DX Motion)",
     basePrice: 17.50,
     trailerId: "73_1biulkYk",
     description: "A listless Wade Wilson toils away in civilian life with his days as the morally flexible mercenary Deadpool behind him. But when his homeworld faces an existential threat, Wade must reluctantly suit up with an even more reluctant Wolverine.",
@@ -115,6 +127,9 @@ export const MOCK_MOVIES = [
     certification: "PG-13",
     director: "Christopher Nolan",
     formats: ["IMAX Re-Release", "Dolby Atmos"],
+    screenNumber: 5,
+    screenName: "Screen 5 - IMAX 70MM Classic Dome",
+    fixedScreen: "Screen 5 (IMAX 70MM)",
     basePrice: 16.00,
     trailerId: "zSWdZVtXT7E",
     description: "When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot, Joseph Cooper, is tasked to pilot a spacecraft, along with a team of researchers, to find a new planet for humans.",
@@ -139,6 +154,9 @@ export const MOCK_MOVIES = [
     certification: "U/A",
     director: "Nag Ashwin",
     formats: ["3D", "IMAX", "Dolby Atmos"],
+    screenNumber: 6,
+    screenName: "Screen 6 - Atmos Grand Auditorium",
+    fixedScreen: "Screen 6 (Dolby Atmos)",
     basePrice: 15.00,
     trailerId: "kQDd1AhGIHk",
     description: "A modern avatar of the Hindu god Vishnu, believed to have descended to the earth to protect the world from evil forces in a dystopian futuristic city of Kasi ruled by the Supreme Yaskin.",
@@ -163,6 +181,9 @@ export const MOCK_MOVIES = [
     certification: "R",
     director: "Ridley Scott",
     formats: ["IMAX", "ScreenX", "Dolby Cinema"],
+    screenNumber: 7,
+    screenName: "Screen 7 - Barco Laser 4K Premiere",
+    fixedScreen: "Screen 7 (Laser 4K)",
     basePrice: 18.00,
     trailerId: "4rgYUipGJNo",
     description: "Years after witnessing the death of the revered hero Maximus at the hands of his uncle, Lucius must enter the Colosseum after his home is conquered by the tyrannical Emperors who now lead Rome with an iron fist.",
@@ -187,6 +208,9 @@ export const MOCK_MOVIES = [
     certification: "PG",
     director: "Kelsey Mann",
     formats: ["3D", "Standard 2D", "Dolby Atmos"],
+    screenNumber: 8,
+    screenName: "Screen 8 - Family Dolby Surround Screen",
+    fixedScreen: "Screen 8 (Dolby Digital)",
     basePrice: 15.50,
     trailerId: "LEjhY15eCx0",
     description: "Teenager Riley's mind headquarters undergoes a sudden demolition to make room for something entirely unexpected: new Emotions! Joy, Sadness, Anger, Fear and Disgust aren't sure how to feel when Anxiety shows up.",
@@ -211,6 +235,9 @@ export const MOCK_MOVIES = [
     certification: "PG-13",
     director: "Christopher Nolan",
     formats: ["IMAX Remastered", "Dolby Atmos"],
+    screenNumber: 9,
+    screenName: "Screen 9 - ScreenX 270° Panoramic",
+    fixedScreen: "Screen 9 (ScreenX)",
     basePrice: 16.50,
     trailerId: "EXeTwQWrcwY",
     description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
@@ -235,6 +262,9 @@ export const MOCK_MOVIES = [
     certification: "PG-13",
     director: "James Cameron",
     formats: ["HFR 3D", "IMAX 3D", "4DX"],
+    screenNumber: 10,
+    screenName: "Screen 10 - RealD 3D 120fps HFR Screen",
+    fixedScreen: "Screen 10 (RealD 3D)",
     basePrice: 19.50,
     trailerId: "d9MyW72ELq0",
     description: "Set more than a decade after the events of the first film, learn the story of the Sully family, the trouble that follows them, the lengths they go to keep each other safe, the battles they fight to stay alive, and the tragedies they endure.",
@@ -259,6 +289,9 @@ export const MOCK_MOVIES = [
     certification: "PG",
     director: "Hayao Miyazaki",
     formats: ["Studio Ghibli 4K Remaster", "Dolby Stereo"],
+    screenNumber: 11,
+    screenName: "Screen 11 - Studio 4K Laser Cinema",
+    fixedScreen: "Screen 11 (Studio 4K)",
     basePrice: 15.00,
     trailerId: "ByXuk9QqQkk",
     description: "During her family's move to the suburbs, a sullen 10-year-old girl wanders into a world ruled by gods, witches, and spirits, and where humans are changed into beasts.",
@@ -282,6 +315,9 @@ export const MOCK_MOVIES = [
     certification: "R",
     director: "Álex Pina",
     formats: ["Standard 2D", "Dolby Atmos"],
+    screenNumber: 12,
+    screenName: "Screen 12 - Executive Recliner Suite",
+    fixedScreen: "Screen 12 (Executive Suite)",
     basePrice: 16.00,
     trailerId: "htqXL94Rza4",
     description: "The gang has been shut in the Bank of Spain for over 100 hours. They have managed to rescue Lisbon, but their darkest moment is upon them after losing one of their own.",
@@ -292,6 +328,34 @@ export const MOCK_MOVIES = [
     showtimes: ["03:00 PM", "06:30 PM", "09:15 PM"]
   }
 ];
+
+// Fixed Screen auditorium definitions: every movie is mapped to a dedicated fixed screen
+export const FIXED_SCREENS = [
+  { screenNumber: 1, movieId: 1, movieTitle: "Dune: Part Two", screenName: "Screen 1 - IMAX 70MM Dual Laser", fixedScreen: "Screen 1 (IMAX 70MM)", format: "IMAX 70MM", sound: "12-Ch IMAX Audio" },
+  { screenNumber: 2, movieId: 2, movieTitle: "Oppenheimer", screenName: "Screen 2 - Dolby Cinema & 64-Ch Atmos", fixedScreen: "Screen 2 (Dolby Cinema)", format: "Dolby Cinema", sound: "Dolby Atmos 64-Ch" },
+  { screenNumber: 3, movieId: 3, movieTitle: "Spider-Man: Across the Spider-Verse", screenName: "Screen 3 - Barco Laser 4K HDR", fixedScreen: "Screen 3 (Laser 4K)", format: "Laser 4K", sound: "Dolby Surround 7.1" },
+  { screenNumber: 4, movieId: 4, movieTitle: "Deadpool & Wolverine", screenName: "Screen 4 - 4DX Dynamic Environmental", fixedScreen: "Screen 4 (4DX Motion)", format: "4DX Motion", sound: "4DX Immersive Audio" },
+  { screenNumber: 5, movieId: 5, movieTitle: "Interstellar", screenName: "Screen 5 - IMAX 70MM Classic Dome", fixedScreen: "Screen 5 (IMAX 70MM)", format: "IMAX 70MM", sound: "IMAX Sonics" },
+  { screenNumber: 6, movieId: 6, movieTitle: "Kalki 2898 AD", screenName: "Screen 6 - Atmos Grand Auditorium", fixedScreen: "Screen 6 (Dolby Atmos)", format: "Dolby Atmos", sound: "Dolby Atmos Surround" },
+  { screenNumber: 7, movieId: 7, movieTitle: "Gladiator II", screenName: "Screen 7 - Barco Laser 4K Premiere", fixedScreen: "Screen 7 (Laser 4K)", format: "Laser 4K", sound: "Dolby Cinema Sound" },
+  { screenNumber: 8, movieId: 8, movieTitle: "Inside Out 2", screenName: "Screen 8 - Family Dolby Surround Screen", fixedScreen: "Screen 8 (Dolby Digital)", format: "Dolby Digital", sound: "Digital Surround 5.1" },
+  { screenNumber: 9, movieId: 9, movieTitle: "The Dark Knight", screenName: "Screen 9 - ScreenX 270° Panoramic", fixedScreen: "Screen 9 (ScreenX)", format: "ScreenX", sound: "ScreenX Immersive" },
+  { screenNumber: 10, movieId: 10, movieTitle: "Avatar: The Way of Water", screenName: "Screen 10 - RealD 3D 120fps HFR Screen", fixedScreen: "Screen 10 (RealD 3D)", format: "RealD 3D", sound: "Dolby Atmos 3D" },
+  { screenNumber: 11, movieId: 11, movieTitle: "Spirited Away", screenName: "Screen 11 - Studio 4K Laser Cinema", fixedScreen: "Screen 11 (Studio 4K)", format: "Studio 4K", sound: "Studio Stereo Remaster" },
+  { screenNumber: 12, movieId: 12, movieTitle: "Money Heist: The Final Chapter", screenName: "Screen 12 - Executive Recliner Suite", fixedScreen: "Screen 12 (Executive Suite)", format: "Executive Suite", sound: "Dolby Digital" }
+];
+
+export const getMovieFixedScreen = (movieId) => {
+  const match = FIXED_SCREENS.find((s) => s.movieId === Number(movieId));
+  if (match) return match;
+  return {
+    screenNumber: 1,
+    screenName: "Screen 1 - Premium Auditorium",
+    fixedScreen: "Screen 1 (Standard)",
+    format: "Standard 2D",
+    sound: "Dolby Surround"
+  };
+};
 
 export const MOCK_THEATRES = [
   {

@@ -27,11 +27,13 @@ import {
   Send,
   Check,
   Percent,
-  Timer
+  Timer,
+  X
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { movieService } from '../api/movieApi';
+import { MOCK_MOVIES } from '../api/mockData';
 import MobileTicketCard from '../components/common/MobileTicketCard';
 
 // Concession snack add-ons available in real cinema multiplexes
@@ -81,6 +83,9 @@ const BookingConfirmationPage = () => {
       theatreId: 'th-1',
       theatreName: 'PVR Superplex IMAX',
       theatreAddress: 'Mall of the Emirates, Level 4',
+      screenNumber: 1,
+      screenName: 'Screen 1 - IMAX 70MM Dual Laser',
+      fixedScreen: 'Screen 1 (IMAX 70MM)',
       date: 'Today',
       showtime: '06:45 PM',
       format: 'IMAX 70MM',
@@ -93,6 +98,34 @@ const BookingConfirmationPage = () => {
       grandTotal: 44.04
     };
   });
+
+  // State for Select Movie (Fixed Screen) Modal
+  const [isSelectMovieModalOpen, setIsSelectMovieModalOpen] = useState(false);
+
+  // Switch movie right here and update fixed screen while retaining current seats
+  const handleSwitchMovieKeepSeats = (movie) => {
+    const updated = {
+      ...bookingData,
+      movieId: movie.id,
+      movieTitle: movie.title,
+      poster: movie.poster,
+      format: movie.formats?.[0] || bookingData.format,
+      screenNumber: movie.screenNumber || movie.id,
+      screenName: movie.screenName || `Screen ${movie.screenNumber || movie.id} - Premium Screen`,
+      fixedScreen: movie.fixedScreen || `Screen ${movie.screenNumber || movie.id} (${movie.formats?.[0] || 'Standard'})`
+    };
+    setBookingData(updated);
+    sessionStorage.setItem('cinepass_pending_booking', JSON.stringify(updated));
+    localStorage.setItem('cinepass_pending_booking', JSON.stringify(updated));
+    setIsSelectMovieModalOpen(false);
+    toast.success(`Switched booking to "${movie.title}" on ${updated.fixedScreen}!`);
+  };
+
+  // Switch movie and jump to seat selection for that movie's dedicated fixed screen
+  const handleSwitchMovieAndPickSeats = (movie) => {
+    setIsSelectMovieModalOpen(false);
+    navigate(`/seat-selection?movieId=${movie.id}&theatreId=${bookingData.theatreId}&format=${encodeURIComponent(movie.formats?.[0] || 'Standard')}&time=${encodeURIComponent(bookingData.showtime)}`);
+  };
 
   // Current Checkout Step: 'details' -> 'payment' -> 'confirmed'
   const [checkoutStep, setCheckoutStep] = useState('details');
@@ -396,9 +429,9 @@ const BookingConfirmationPage = () => {
                   <p className="text-[11px] text-slate-400 truncate">{confirmedTicket.theatreAddress}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-medium">Format & Screen</span>
+                  <span className="text-slate-400 font-medium">Format & Fixed Screen</span>
                   <p className="font-bold text-amber-400 text-sm mt-0.5">{confirmedTicket.format}</p>
-                  <p className="text-[11px] text-slate-400">Auditorium Screen 4</p>
+                  <p className="text-[11px] text-amber-300/80 font-mono font-medium">{confirmedTicket.screenName || confirmedTicket.fixedScreen || 'Screen 1 - IMAX 70MM Dual Laser'}</p>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Date & Time</span>
@@ -539,7 +572,56 @@ const BookingConfirmationPage = () => {
           {/* STEP 1: CONTACT INFO & CONCESSIONS ADD-ONS */}
           {checkoutStep === 'details' && (
             <div className="space-y-6">
-              
+
+              {/* Active Movie & Dedicated Fixed Screen Banner with Switch Option */}
+              <div className="p-5 rounded-2xl bg-gradient-to-r from-[#211d13] via-[#161710] to-[#262013] border border-amber-500/30 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <img
+                    src={bookingData.poster}
+                    alt={bookingData.movieTitle}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&q=80";
+                    }}
+                    className="w-16 h-22 rounded-xl object-cover ring-1 ring-amber-500/40 shrink-0 shadow-md"
+                  />
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase">
+                        🎬 {bookingData.fixedScreen || 'Fixed Screen 1 (IMAX 70MM)'}
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                        {bookingData.format || 'Standard'}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-extrabold text-white">
+                      {bookingData.movieTitle}
+                    </h3>
+                    <p className="text-xs text-slate-400 flex items-center gap-1.5 flex-wrap">
+                      <span>{bookingData.theatreName}</span>
+                      <span>•</span>
+                      <span>{bookingData.showtime}</span>
+                      <span>•</span>
+                      <span className="text-amber-300 font-semibold">{bookingData.selectedSeats?.length || 0} Seats ({bookingData.selectedSeats?.join(', ')})</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 border-amber-900/30">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 hidden sm:block">
+                    Change Screening?
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsSelectMovieModalOpen(true)}
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 hover:brightness-110 text-slate-950 font-black text-xs shadow-md shadow-amber-500/30 transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Film className="w-3.5 h-3.5 text-slate-950" />
+                    <span>Select Another Movie</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Customer Contact Information */}
               <div className="p-6 rounded-2xl bg-[#161710] border border-amber-900/40 shadow-xl space-y-4">
                 <div>
@@ -905,15 +987,34 @@ const BookingConfirmationPage = () => {
               }}
               className="w-14 h-20 rounded-xl object-cover ring-1 ring-amber-900/40 shrink-0 shadow-md"
             />
-            <div>
-              <h4 className="text-sm font-bold text-white">{bookingData.movieTitle}</h4>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-sm font-bold text-white truncate">{bookingData.movieTitle}</h4>
               <p className="text-xs text-amber-400 font-semibold mt-0.5">{bookingData.format}</p>
-              <p className="text-[11px] text-slate-400 mt-1">{bookingData.theatreName}</p>
+              <div className="mt-1">
+                <span className="inline-block text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 truncate max-w-full">
+                  🎬 {bookingData.fixedScreen || 'Screen 1 (IMAX 70MM)'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1 truncate">{bookingData.theatreName}</p>
             </div>
           </div>
 
+          {/* Select Movie & Screen Switcher Button */}
+          <button
+            type="button"
+            onClick={() => setIsSelectMovieModalOpen(true)}
+            className="w-full py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm hover:border-amber-400"
+          >
+            <Film className="w-3.5 h-3.5 text-amber-400" />
+            <span>Select Another Movie & Screen</span>
+          </button>
+
           {/* Booking Metadata */}
           <div className="space-y-2 text-xs text-slate-300 pt-3 border-t border-amber-900/30">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">Fixed Screen:</span>
+              <span className="font-semibold text-amber-300 font-mono text-[11px]">{bookingData.fixedScreen || 'Screen 1 (IMAX 70MM)'}</span>
+            </div>
             <div className="flex items-center justify-between">
               <span className="text-slate-400">Date:</span>
               <span className="font-semibold text-white">{bookingData.date}</span>
@@ -1020,6 +1121,136 @@ const BookingConfirmationPage = () => {
               <ShieldCheck className="w-4 h-4" />
               <span>Official CinePass 256-Bit SSL Gateway</span>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Select Movie & Fixed Screen Modal Dialog */}
+      {isSelectMovieModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-[#161710] border border-amber-500/30 rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="p-5 sm:p-6 bg-gradient-to-r from-[#211d13] via-[#161710] to-[#262013] border-b border-amber-900/40 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-500 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-amber-500/30">
+                  <Film className="w-5 h-5 text-slate-950" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-extrabold text-white">
+                    Select Movie & Dedicated Fixed Screen
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Every title in the multiplex has a permanently allocated auditorium screen.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSelectMovieModalOpen(false)}
+                className="w-9 h-9 rounded-full bg-[#12130d] border border-amber-900/40 hover:bg-[#1f2115] hover:border-amber-500/50 flex items-center justify-center text-slate-400 hover:text-white transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-3.5 divide-y divide-amber-900/20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {MOCK_MOVIES.map((movie) => {
+                  const isCurrent = bookingData.movieId === movie.id;
+                  const screenLabel = movie.fixedScreen || `Screen ${movie.screenNumber || movie.id} (${movie.formats?.[0] || 'Standard'})`;
+
+                  return (
+                    <div
+                      key={movie.id}
+                      className={`p-4 rounded-2xl border transition-all flex flex-col justify-between gap-3 ${
+                        isCurrent
+                          ? 'bg-amber-600/15 border-amber-500/60 shadow-lg shadow-amber-600/10'
+                          : 'bg-[#12130d] border-amber-900/30 hover:border-amber-500/40 hover:bg-[#1a1c12]'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3.5">
+                        <img
+                          src={movie.poster}
+                          alt={movie.title}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&q=80";
+                          }}
+                          className="w-16 h-24 rounded-xl object-cover ring-1 ring-amber-900/40 shrink-0 shadow-md"
+                        />
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-600/20 to-yellow-600/20 text-amber-300 border border-amber-500/30 uppercase">
+                              🎬 Screen {movie.screenNumber || movie.id}
+                            </span>
+                            {isCurrent && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                Current Selection
+                              </span>
+                            )}
+                          </div>
+                          <h4 className="text-sm font-bold text-white truncate">
+                            {movie.title}
+                          </h4>
+                          <p className="text-[11px] text-amber-300 font-mono font-semibold truncate">
+                            {screenLabel}
+                          </p>
+                          <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                            <span>★ {movie.rating}</span>
+                            <span>•</span>
+                            <span>{movie.duration}</span>
+                            <span>•</span>
+                            <span className="truncate">{Array.isArray(movie.genre) ? movie.genre.join(', ') : movie.genre}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons for this Movie */}
+                      <div className="pt-2 border-t border-amber-900/30 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSwitchMovieKeepSeats(movie)}
+                          disabled={isCurrent}
+                          className={`w-full py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                            isCurrent
+                              ? 'bg-amber-500/10 text-amber-400/50 cursor-not-allowed border border-amber-500/20'
+                              : 'bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 hover:brightness-110 text-slate-950 font-black shadow-md shadow-amber-500/20'
+                          }`}
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Keep My Seats</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSwitchMovieAndPickSeats(movie)}
+                          className="w-full py-2 px-2.5 rounded-xl text-xs font-bold bg-[#12130d] hover:bg-[#1e2014] text-slate-200 hover:text-white border border-amber-900/40 hover:border-amber-500/40 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Ticket className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Pick Seats for Screen {movie.screenNumber || movie.id}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-[#12130d] border-t border-amber-900/40 flex items-center justify-between shrink-0">
+              <span className="text-[11px] text-slate-400 font-mono">
+                12 Movies • 12 Dedicated Multiplex Screens
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsSelectMovieModalOpen(false)}
+                className="px-5 py-2 rounded-xl bg-[#1e2014] hover:bg-[#282b1b] border border-amber-900/40 text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+
           </div>
         </div>
       )}

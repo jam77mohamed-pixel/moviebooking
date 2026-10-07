@@ -175,6 +175,9 @@ const MovieDetailPage = () => {
                 <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
                   {movie.language}
                 </span>
+                <span className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-bold bg-gradient-to-r from-amber-600/30 to-yellow-600/30 text-amber-300 border border-amber-500/40">
+                  🎬 {movie.fixedScreen || `Screen ${movie.screenNumber || movie.id}`}
+                </span>
                 {movie.formats?.map((fmt) => (
                   <span
                     key={fmt}
@@ -358,6 +361,19 @@ const MovieDetailPage = () => {
               </h3>
               <span className="text-xs text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                 Selling Fast
+              </span>
+            </div>
+
+            {/* Dedicated Multiplex Auditorium Screen */}
+            <div className="p-3.5 rounded-2xl bg-[#12130d] border border-amber-500/30 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Dedicated Multiplex Screen</span>
+                <span className="text-xs font-mono font-bold text-amber-300">
+                  🎬 {movie.fixedScreen || `Screen ${movie.screenNumber || movie.id}`}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                FIXED SCREEN
               </span>
             </div>
 

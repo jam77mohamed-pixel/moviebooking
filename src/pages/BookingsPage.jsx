@@ -260,10 +260,15 @@ const BookingsPage = () => {
                       {renderStatusBadge(b.status || 'Confirmed')}
                     </div>
 
-                    <p className="text-xs text-slate-400 flex items-center gap-1.5 truncate">
-                      <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                      <span>{theatre}</span>
-                    </p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-xs text-slate-400 flex items-center gap-1.5 truncate">
+                        <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <span>{theatre}</span>
+                      </p>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                        🎬 {b.fixedScreen || b.screenName || (b.screenNumber ? `Screen ${b.screenNumber}` : 'Screen 1 (IMAX 70MM)')}
+                      </span>
+                    </div>
 
                     <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300 pt-1">
                       <span className="flex items-center gap-1">
