@@ -16,8 +16,8 @@ const LoginForm = ({ onForgotPassword, onSuccess, onSwitchToRegister }) => {
     formState: { errors }
   } = useForm({
     defaultValues: {
-      email: rememberedEmail || 'malik@cinema.com',
-      password: 'Password123',
+      email: rememberedEmail || '',
+      password: '',
       rememberMe: !!rememberedEmail
     }
   });
@@ -136,15 +136,6 @@ const LoginForm = ({ onForgotPassword, onSuccess, onSwitchToRegister }) => {
             />
             <span>Remember me</span>
           </label>
-
-          {/* Quick Demo Pre-fill Pill */}
-          <button
-            type="button"
-            onClick={() => handleFillDemo('malik@cinema.com', 'Password123')}
-            className="text-[11px] text-amber-400 hover:text-amber-300 font-mono transition-colors cursor-pointer"
-          >
-            Auto-fill Demo Credentials
-          </button>
         </div>
 
         {/* Primary Action Button */}
