@@ -130,10 +130,10 @@ const BookingConfirmationPage = () => {
   // Current Checkout Step: 'details' -> 'payment' -> 'confirmed'
   const [checkoutStep, setCheckoutStep] = useState('details');
 
-  // Customer Contact Details
-  const [customerName, setCustomerName] = useState(currentUser?.name || 'Malik S');
-  const [customerEmail, setCustomerEmail] = useState(currentUser?.email || 'malik@cinema.com');
-  const [customerPhone, setCustomerPhone] = useState('+1 (555) 234-5678');
+  // Customer Contact Details - MUST BE ENTERED MANUALLY (Zero in-built/prefilled text)
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
 
   // Concessions Add-on state
   const [selectedSnacks, setSelectedSnacks] = useState({});
@@ -146,17 +146,37 @@ const BookingConfirmationPage = () => {
   // 10-Minute Seat Hold Countdown Timer
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
 
-  // Payment Options & Details
+  // Payment Options & Details - MUST BE ENTERED MANUALLY (Zero in-built/prefilled text)
   const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' | 'upi' | 'wallet' | 'netbanking'
   const [cardDetails, setCardDetails] = useState({
-    holder: currentUser?.name || 'Malik S',
-    number: '4532 •••• •••• 8821',
-    expiry: '12/28',
-    cvv: '842',
-    saveCard: true
+    holder: '',
+    number: '',
+    expiry: '',
+    cvv: '',
+    saveCard: false
   });
-  const [upiId, setUpiId] = useState('malik@okaxis');
-  const [selectedBank, setSelectedBank] = useState('Chase Bank');
+  const [upiId, setUpiId] = useState('');
+  const [selectedBank, setSelectedBank] = useState('');
+
+  // Manual input formatting helpers for clean typing
+  const handleCardNumberChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 16);
+    const formatted = raw.replace(/(\d{4})(?=\d)/g, '$1 ');
+    setCardDetails((prev) => ({ ...prev, number: formatted }));
+  };
+
+  const handleExpiryChange = (e) => {
+    let raw = e.target.value.replace(/\D/g, '').slice(0, 4);
+    if (raw.length >= 3) {
+      raw = raw.slice(0, 2) + '/' + raw.slice(2);
+    }
+    setCardDetails((prev) => ({ ...prev, expiry: raw }));
+  };
+
+  const handleCvvChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 4);
+    setCardDetails((prev) => ({ ...prev, cvv: raw }));
+  };
 
   // Payment Processing & Confirmation states
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -237,28 +257,87 @@ const BookingConfirmationPage = () => {
   const taxes = Number((taxableSubtotal * 0.08).toFixed(2));
   const finalGrandTotal = Number((taxableSubtotal + convenienceFee + taxes).toFixed(2));
 
-  // Proceed from Contact/Add-ons to Payment step
+  // Proceed from Contact/Add-ons to Payment step (Strict manual validation)
   const handleGoToPayment = (e) => {
     if (e) e.preventDefault();
-    if (!customerName.trim() || !customerEmail.trim()) {
-      toast.error('Please provide valid customer name and email.');
+    const nameTrimmed = customerName.trim();
+    const emailTrimmed = customerEmail.trim();
+    const phoneTrimmed = customerPhone.trim();
+
+    if (!nameTrimmed) {
+      toast.error('Please enter your full name manually to proceed.');
       return;
     }
+    if (nameTrimmed.length < 2) {
+      toast.error('Full name must be at least 2 characters long.');
+      return;
+    }
+    if (!emailTrimmed) {
+      toast.error('Please enter your email address manually for ticket delivery.');
+      return;
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(emailTrimmed)) {
+      toast.error('Please enter a valid email address (e.g. name@example.com).');
+      return;
+    }
+    if (!phoneTrimmed) {
+      toast.error('Please enter your mobile phone number manually for SMS pass.');
+      return;
+    }
+    const phoneDigits = phoneTrimmed.replace(/\D/g, '');
+    if (phoneDigits.length < 7) {
+      toast.error('Please enter a valid mobile number (at least 7 digits).');
+      return;
+    }
+
     setCheckoutStep('payment');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Execute Final Payment & Ticket Issuance
+  // Execute Final Payment & Ticket Issuance (Validates manual payment credentials)
   const handleExecutePayment = async () => {
-    setIsProcessingPayment(true);
     setErrorMsg('');
+
+    // Strict manual entry verification based on payment method
+    if (paymentMethod === 'card') {
+      if (!cardDetails.holder.trim()) {
+        toast.error('Please enter the cardholder name manually.');
+        return;
+      }
+      const rawCardNum = cardDetails.number.replace(/\s+/g, '');
+      if (!rawCardNum || rawCardNum.length < 13) {
+        toast.error('Please enter a valid 16-digit card number manually.');
+        return;
+      }
+      if (!cardDetails.expiry.trim() || cardDetails.expiry.trim().length < 4) {
+        toast.error('Please enter card expiry date (MM/YY) manually.');
+        return;
+      }
+      if (!cardDetails.cvv.trim() || cardDetails.cvv.trim().length < 3) {
+        toast.error('Please enter the 3-digit CVV code manually.');
+        return;
+      }
+    } else if (paymentMethod === 'upi') {
+      if (!upiId.trim() || !upiId.includes('@')) {
+        toast.error('Please enter your UPI ID manually (e.g. username@okhdfcbank).');
+        return;
+      }
+    } else if (paymentMethod === 'netbanking') {
+      if (!selectedBank) {
+        toast.error('Please select your banking institution manually.');
+        return;
+      }
+    }
+
+    setIsProcessingPayment(true);
 
     try {
       // Realistic 3D-Secure banking handshake simulation
       setProcessingStage('Connecting to 256-Bit SSL Payment Gateway...');
       await new Promise((r) => setTimeout(r, 600));
 
-      setProcessingStage('Verifying with bank issuer & locking auditorium seats...');
+      setProcessingStage('Verifying credentials with bank issuer & locking seats...');
       await new Promise((r) => setTimeout(r, 700));
 
       setProcessingStage('Payment authorized! Generating CinePass digital boarding pass...');
@@ -272,13 +351,22 @@ const BookingConfirmationPage = () => {
         })
         .join(', ');
 
+      const cardLast4 = cardDetails.number.replace(/\s+/g, '').slice(-4) || '8821';
+      const paymentSummary = paymentMethod === 'card'
+        ? `Credit Card (Visa •••• ${cardLast4})`
+        : paymentMethod === 'upi'
+        ? `UPI (${upiId.trim()})`
+        : paymentMethod === 'netbanking'
+        ? `Net Banking (${selectedBank})`
+        : `Digital Wallet`;
+
       const confirmed = await movieService.createBooking({
         ...bookingData,
         grandTotal: finalGrandTotal,
         customerName: customerName.trim(),
         customerEmail: customerEmail.trim(),
         customerPhone: customerPhone.trim(),
-        paymentMethod: paymentMethod === 'card' ? `Credit Card (Visa •••• ${cardDetails.number.slice(-4)})` : paymentMethod.toUpperCase(),
+        paymentMethod: paymentSummary,
         transactionId: `TXN-${Math.floor(10000000 + Math.random() * 90000000)}`,
         authCode: `AUTH-${Math.floor(10000 + Math.random() * 90000)}`,
         concessions: snacksSummary || 'None',
@@ -637,7 +725,7 @@ const BookingConfirmationPage = () => {
                 <form onSubmit={handleGoToPayment} className="space-y-3.5">
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Full Name
+                      Full Name <span className="text-amber-400">*</span>
                     </label>
                     <div className="relative">
                       <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -646,8 +734,8 @@ const BookingConfirmationPage = () => {
                         required
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
-                        placeholder="e.g. John Doe"
-                        className="w-full pl-10 pr-4 py-2.5 bg-[#12130d] text-sm text-slate-200 rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
+                        placeholder="Enter your full name manually"
+                        className="w-full pl-10 pr-4 py-2.5 bg-[#12130d] text-sm text-slate-200 placeholder-slate-500 rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -655,7 +743,7 @@ const BookingConfirmationPage = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
                       <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Email Address
+                        Email Address <span className="text-amber-400">*</span>
                       </label>
                       <div className="relative">
                         <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -664,15 +752,15 @@ const BookingConfirmationPage = () => {
                           required
                           value={customerEmail}
                           onChange={(e) => setCustomerEmail(e.target.value)}
-                          placeholder="e.g. malik@cinema.com"
-                          className="w-full pl-10 pr-4 py-2.5 bg-[#12130d] text-sm text-slate-200 rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
+                          placeholder="Enter your email address manually"
+                          className="w-full pl-10 pr-4 py-2.5 bg-[#12130d] text-sm text-slate-200 placeholder-slate-500 rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Mobile Phone (SMS Entry Pass)
+                        Mobile Phone (SMS Entry Pass) <span className="text-amber-400">*</span>
                       </label>
                       <div className="relative">
                         <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -681,8 +769,8 @@ const BookingConfirmationPage = () => {
                           required
                           value={customerPhone}
                           onChange={(e) => setCustomerPhone(e.target.value)}
-                          placeholder="e.g. +1 (555) 019-2831"
-                          className="w-full pl-10 pr-4 py-2.5 bg-[#12130d] text-sm text-slate-200 rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
+                          placeholder="Enter your mobile phone number manually"
+                          className="w-full pl-10 pr-4 py-2.5 bg-[#12130d] text-sm text-slate-200 placeholder-slate-500 rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -807,69 +895,61 @@ const BookingConfirmationPage = () => {
                   <div className="space-y-4 pt-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-semibold text-slate-300">Enter Card Credentials</span>
-                      <button
-                        type="button"
-                        onClick={() => setCardDetails({
-                          holder: 'Malik S',
-                          number: '4532 •••• •••• 8821',
-                          expiry: '12/28',
-                          cvv: '842',
-                          saveCard: true
-                        })}
-                        className="text-[11px] font-mono text-amber-400 hover:text-amber-300 cursor-pointer"
-                      >
-                        Auto-fill Demo Card
-                      </button>
+                      <span className="text-[11px] text-amber-400/90 font-mono font-semibold">
+                        Manual Entry Required
+                      </span>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-1">Cardholder Name</label>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Cardholder Name <span className="text-amber-400">*</span></label>
                       <input
                         type="text"
                         value={cardDetails.holder}
                         onChange={(e) => setCardDetails({ ...cardDetails, holder: e.target.value })}
-                        placeholder="Name on card"
-                        className="w-full px-3.5 py-2.5 bg-[#12130d] text-sm text-slate-100 rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
+                        placeholder="Enter full name on card manually"
+                        className="w-full px-3.5 py-2.5 bg-[#12130d] text-sm text-slate-100 placeholder-slate-500 rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-1">Card Number</label>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Card Number <span className="text-amber-400">*</span></label>
                       <div className="relative">
                         <CreditCard className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
                           type="text"
+                          maxLength={19}
                           value={cardDetails.number}
-                          onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
-                          placeholder="4532 •••• •••• 8821"
-                          className="w-full pl-10 pr-16 py-2.5 bg-[#12130d] text-sm text-slate-100 font-mono rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
+                          onChange={handleCardNumberChange}
+                          placeholder="Enter 16-digit card number manually"
+                          className="w-full pl-10 pr-16 py-2.5 bg-[#12130d] text-sm text-slate-100 placeholder-slate-500 font-mono rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 uppercase">
-                          VISA
+                          VISA / MC
                         </span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1">Expiry Date</label>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1">Expiry Date <span className="text-amber-400">*</span></label>
                         <input
                           type="text"
+                          maxLength={5}
                           value={cardDetails.expiry}
-                          onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-                          placeholder="MM/YY"
-                          className="w-full px-3.5 py-2.5 bg-[#12130d] text-sm text-slate-100 font-mono rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
+                          onChange={handleExpiryChange}
+                          placeholder="MM / YY"
+                          className="w-full px-3.5 py-2.5 bg-[#12130d] text-sm text-slate-100 placeholder-slate-500 font-mono rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1">CVV / CVC</label>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1">CVV / CVC <span className="text-amber-400">*</span></label>
                         <input
                           type="password"
                           maxLength={4}
                           value={cardDetails.cvv}
-                          onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                          placeholder="•••"
-                          className="w-full px-3.5 py-2.5 bg-[#12130d] text-sm text-slate-100 font-mono rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
+                          onChange={handleCvvChange}
+                          placeholder="CVV"
+                          className="w-full px-3.5 py-2.5 bg-[#12130d] text-sm text-slate-100 placeholder-slate-500 font-mono rounded-xl border border-amber-900/40 focus:border-amber-500 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -887,13 +967,13 @@ const BookingConfirmationPage = () => {
                       </div>
                     </div>
                     <div className="max-w-xs mx-auto">
-                      <label className="block text-xs font-semibold text-slate-400 mb-1 text-left">Or enter UPI ID</label>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1 text-left">Or enter UPI ID manually <span className="text-amber-400">*</span></label>
                       <input
                         type="text"
                         value={upiId}
                         onChange={(e) => setUpiId(e.target.value)}
-                        placeholder="username@okhdfcbank"
-                        className="w-full px-3 py-2 bg-[#161710] text-xs text-slate-200 rounded-lg border border-amber-900/40 font-mono"
+                        placeholder="Enter UPI ID manually (e.g. username@okhdfcbank)"
+                        className="w-full px-3 py-2 bg-[#161710] text-xs text-slate-200 placeholder-slate-500 rounded-lg border border-amber-900/40 font-mono focus:border-amber-500 focus:outline-none"
                       />
                     </div>
                   </div>
